@@ -49,6 +49,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.JsonObject;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.geojson.Point;
@@ -57,12 +58,14 @@ import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -95,7 +98,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         back = (TextView) findViewById(R.id.back);
         findRoute = (Button) findViewById(R.id.findRoute);
         safeNow = (Button) findViewById(R.id.safeNow);
-
+        sourceTextView = (TextView) findViewById(R.id.source_textView);
+        destTextView = (TextView) findViewById(R.id.dest_textView);
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("Pref", 0);
         if(preferences!=null){
             if(!preferences.getBoolean("safeNow", false)){
@@ -187,6 +191,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
 
+        final LatLng currentLocation = getCurrentLocation();
+        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16));
+        
+
     }
 
     public static BitmapDescriptor generateBitmapDescriptorFromRes(
@@ -265,8 +274,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             ((Point) sourceCarmen.geometry()).longitude());
                     LatLng destLocation = new LatLng(((Point) destCarmen.geometry()).latitude(),
                             ((Point) destCarmen.geometry()).longitude());
-
-                    mMap.addMarker(new MarkerOptions().position(sourceLocation).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    markerPoints.clear();
+                    markerPoints.add(sourceLocation);
+                    markerPoints.add(destLocation);
+                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(sourceLocation).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                     mMap.addMarker(new MarkerOptions().position(destLocation).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sourceLocation, 13));
                     // Zoom in, animating the camera.
@@ -337,35 +348,130 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             progressDialog.hide();
             JSONObject jsonObject = null;
             Log.i("info", result);
-            Toast.makeText(MapsActivity.this, "res: " + result, Toast.LENGTH_LONG).show();
-            try {
-                jsonObject = new JSONObject(result);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(result.isEmpty()){
+                Toast.makeText(MapsActivity.this, "Unable to get the routes. Please try again!", Toast.LENGTH_LONG).show();
             }
-            try {
-                JSONArray jsonArray = jsonObject.getJSONArray("routes");
-                JSONObject obj = jsonArray.getJSONObject(0);
-                JSONObject geometryObject = obj.getJSONObject("geometry");
+            else {
 
-                //Toast.makeText(MapsActivity.this, "res: " + geometryObject.toString(), Toast.LENGTH_LONG).show();
-                layer = new GeoJsonLayer(mMap, geometryObject);
-                layer.addLayerToMap();
+                try {
+                    jsonObject = new JSONObject(result);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    JSONArray jsonArray = jsonObject.getJSONArray("routes");
+                    JSONObject obj = jsonArray.getJSONObject(0);
+                    JSONObject geometryObject = obj.getJSONObject("geometry");
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                    layer = new GeoJsonLayer(mMap, geometryObject);
+                    layer.addLayerToMap();
+
+                    //To get the prediction from the ML model hosted on the server
+                    GetRoutes getRoutes = new GetRoutes();
+                    String url = "http://172.31.128.87:12345/predict";
+                    getRoutes.execute(url, geometryObject.toString());
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            //Toast.makeText(MapsActivity.this, "result: " + result, Toast.LENGTH_LONG).show();
         }
 
     }
 
+    private class GetRoutes extends AsyncTask<String, Void, String> {
+        private ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(MapsActivity.this);
+            progressDialog.setMessage("Finding Routes...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... url) {
+            String data = "";
+            try {
+
+                URL object = new URL(url[0]);
+
+                HttpURLConnection con = (HttpURLConnection) object.openConnection();
+                con.setDoOutput(true);
+                con.setDoInput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+
+                Log.i("info", url[1]);
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(url[1]);
+                wr.flush();
+
+//display what returns the POST request
+
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = con.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader(con.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    //System.out.println("" + sb.toString());
+                    data = sb.toString();
+                    //Toast.makeText(MainActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+
+                } else {
+                    //Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return  data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            progressDialog.hide();
+            Toast.makeText(MapsActivity.this, result, Toast.LENGTH_SHORT).show();
+            if(result.contains("prediction")){
+                if (currentLocationMarker!=null) {
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(result);
+                        String prediction = jsonObject.getString("prediction");
+
+                        currentLocationMarker.setTitle("Model Prediction");
+                        currentLocationMarker.setSnippet(prediction);
+                        currentLocationMarker.showInfoWindow();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+
+
+                } else {
+                    Toast.makeText(MapsActivity.this, "Error processing request", Toast.LENGTH_LONG).show();
+                }
+            }
+            else{
+                Toast.makeText(MapsActivity.this, "Error retrieving route info", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+    }
+
+
+
     private String getDirectionsUrlMap (LatLng origin, LatLng dest){
 
-        // Origin of route
         String str_origin = origin.longitude + "," + origin.latitude;
-
-        // Destination of route
         String str_dest = dest.longitude + "," + dest.latitude;
 
         String url = "http://router.project-osrm.org/route/v1/driving/" + str_origin + ";" + str_dest + "?steps=true&geometries=geojson&continue_straight=false";
