@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Users.PostActivity"></activity>
+        <activity android:name=".Users.CreatePost"></activity>
+        <activity android:name=".Users.PostActivity" />
         <activity android:name=".Users.CompleteSignUp" />
         <activity android:name=".Users.SignUpActivity" />
         <activity android:name=".MainActivity">

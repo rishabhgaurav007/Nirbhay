@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#E8E5EC "
+        android:layout_margin="5dp"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:padding="10dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:padding="15dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/viewProfile"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:elevation="0dp"
+                    android:src="@drawable/user_image" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Owner Name"
+                        android:id="@+id/ownerName"
+                        android:layout_marginLeft="20dp"
+                        android:textColor="#191919"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/dateTime"
+                        android:layout_marginLeft="10dp"
+                        android:text="Time of post"/>
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:background="#696969" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_gravity="bottom">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:id="@+id/postBody"
+                    android:layout_height="match_parent"
+                    android:text="Body of the post"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp">
+                    <Button
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/upvote"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/upvote"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/upVoteCount"
+                        android:layout_margin="10dp"/>
+                    <Button
+                        android:layout_width="20dp"
+                        android:id="@+id/downvote"
+                        android:layout_height="20dp"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/downvote"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/downVoteCount"
+                        android:layout_margin="10dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

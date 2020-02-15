@@ -106,6 +106,15 @@
                 android:clickable="true"
                 android:src="@drawable/create_post"/>
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/goToMap"
+                android:layout_width="wrap_content"
+                android:layout_height="88dp"
+                android:layout_gravity="bottom|left"
+                android:layout_margin="20dp"
+                android:clickable="true"
+                android:src="@drawable/ic_navigation_black_24dp"/>
+
         </com.github.captain_miao.optroundcardview.OptRoundCardView>
     </LinearLayout>
 
