@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.nirbhay.Police.Survillance;
 import com.example.nirbhay.Users.CompleteSignUp;
 import com.example.nirbhay.Users.PostActivity;
 import com.example.nirbhay.Users.SignUpActivity;
@@ -52,13 +53,20 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, CompleteSignUp.class);
                     startActivity(intent);
                 }else {
-
-                    Intent intent = new Intent(this, PostActivity.class);
-                    startActivity(intent);
-                    finish();
+                    if(preferences.getBoolean("userSignIn", false)) {
+                        Intent intent = new Intent(this, PostActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else{
+                        Intent intent = new Intent(this, Survillance.class);
+                        startActivity(intent);
+                        finish();
+                    }
                 }
             }
         }
+
 
 
 
@@ -92,6 +100,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void policeSignInClick(View view){
+        String password = passwordField.getText().toString();
+        String email = emailField.getText().toString();
+        if (validate()) {
+            policeSignIn(email, password);
+        }
+    }
+
+    public void policeSignIn(String email, String password){
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage("Signing in...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    progressDialog.hide();
+                    Toast.makeText(MainActivity.this, "Successfully Logged In", Toast.LENGTH_LONG).show();
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences("Pref", 0);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean("userSignIn", false);
+                    editor.putBoolean("finishedSignUp", true);
+                    editor.putBoolean("signedIn", true);
+                    editor.apply();
+                    editor.commit();
+
+                    Intent intent = new Intent(MainActivity.this, Survillance.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    progressDialog.hide();
+                    Toast.makeText(MainActivity.this, "Login failed: " + task.getException(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+    }
     public void signIn(String email, String password){
         progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setMessage("Signing in...");
@@ -106,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Successfully Logged In", Toast.LENGTH_LONG).show();
                     SharedPreferences pref = getApplicationContext().getSharedPreferences("Pref", 0);
                     SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean("userSignIn", true);
                     editor.putBoolean("finishedSignUp", true);
                     editor.putBoolean("signedIn", true);
                     editor.apply();

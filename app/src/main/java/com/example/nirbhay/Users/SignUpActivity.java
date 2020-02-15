@@ -67,6 +67,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         SharedPreferences pref = getApplicationContext().getSharedPreferences("Pref", 0);
                                         SharedPreferences.Editor editor = pref.edit();
                                         editor.putBoolean("finishedSignUp", false);
+                                        editor.putBoolean("userSignIn", true);
                                         editor.putBoolean("signedIn", true);
                                         editor.putBoolean("safeNow", true);
                                         editor.apply();
