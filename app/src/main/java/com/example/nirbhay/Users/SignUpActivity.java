@@ -68,6 +68,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         SharedPreferences.Editor editor = pref.edit();
                                         editor.putBoolean("finishedSignUp", false);
                                         editor.putBoolean("signedIn", true);
+                                        editor.putBoolean("safeNow", true);
                                         editor.apply();
                                         editor.commit();
                                         Intent intent = new Intent(SignUpActivity.this, CompleteSignUp.class);

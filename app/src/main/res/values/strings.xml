@@ -2,4 +2,5 @@
     <string name="app_name">Nirbhay</string>
     <string name="title_activity_choose_location">Map</string>
     <string name="access_token">pk.eyJ1Ijoia2swMCIsImEiOiJjazZoemZlMzgwMTF5M25sbDV4dTNlM2hrIn0.Ez-Mgfbo0n7eI2w3ugN53w</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

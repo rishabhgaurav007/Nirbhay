@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.nirbhay.MainActivity;
 import com.example.nirbhay.R;
+import com.example.nirbhay.Users.MapDir.MapsActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,7 +46,7 @@ import java.util.List;
 
 public class PostActivity extends AppCompatActivity {
 
-    private FloatingActionButton createPost;
+    private FloatingActionButton createPost, goToMap;
     private List<PostDetails> posts = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter mAdapter;
@@ -61,7 +62,15 @@ public class PostActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         postHeader = (TextView) findViewById(R.id.postHeader);
         progressBar = (ProgressBar) findViewById(R.id.progressBar_cyclic);
+        goToMap = (FloatingActionButton) findViewById(R.id.goToMap);
 
+        goToMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(PostActivity.this, MapsActivity.class);
+                startActivity(intent);
+            }
+        });
         databaseReference = FirebaseDatabase.getInstance().getReference();
         mAdapter = new RecyclerViewAdapter(posts, new RecyclerViewAdapter.ClickHandler() {
             @Override
