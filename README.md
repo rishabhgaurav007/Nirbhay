@@ -13,3 +13,5 @@
   - In the era of a working woman, our app makes sure that women are given enough opportunities and independence to pursue their dreams. This app is basically built for the class of working women who often have to work late at night, or travel to unknown places. Through our app we have tried to make sure that no woman feels unsafe.
   - We provide a safety map which indicates the safety of different regions, along with the details of the nearest police station, hospital etc which can come handy in an emergency.
   - Women who are not able to report crime to the police due to various reasons , and societal pressure can now use the social blog to tell their experience about a particular place.
+
+## Contributors
