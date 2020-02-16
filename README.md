@@ -15,9 +15,9 @@
   - Women who are not able to report crime to the police due to various reasons , and societal pressure can now use the social blog to tell their experience about a particular place.
 
 ## Contributors.
-[Rishabh Gaurav](https://github.com/rishabhgaurav007)
-[Krishna Kant Singh](https://github.com/kks0101)
-[Nitish Srivastava](https://github.com/nitish2904)
-[Shivanshu Tripathi](https://github.com/shivanshu-gt)
+- [Rishabh Gaurav](https://github.com/rishabhgaurav007)
+- [Krishna Kant Singh](https://github.com/kks0101)
+- [Nitish Srivastava](https://github.com/nitish2904)
+- [Shivanshu Tripathi](https://github.com/shivanshu-gt)
 
 ## For HACK36
