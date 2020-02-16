@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -53,6 +52,7 @@ public class PostActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private TextView postHeader;
     private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,19 +71,26 @@ public class PostActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        //handling onClick events on data items inside Recycler View
         mAdapter = new RecyclerViewAdapter(posts, new RecyclerViewAdapter.ClickHandler() {
             @Override
             public void onButtonClicked(View view, int position) {
                 final PostDetails selectedPost = posts.get(position);
+                //if upvote button clicked
                 if(view.getId() == R.id.upvote){
-                    Toast.makeText(PostActivity.this, "Upvote clicked " + selectedPost.getPincode(), Toast.LENGTH_SHORT).show();
+                    //update database
                     final DatabaseReference dbRef = databaseReference.child("posts").child(selectedPost.getPincode()).child(selectedPost.getPostId());
                     dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                             PostDetails fetchedPost = dataSnapshot.getValue(PostDetails.class);
                             int flag= 1;
+
+                            //Check if the user has already voted
                             for(DataSnapshot upVoteSnapShot : dataSnapshot.child("upVoteUsers").getChildren()){
                                 if(upVoteSnapShot.getValue().equals(selectedPost.getOwnerUserId()))
                                     flag=0;
@@ -94,7 +101,7 @@ public class PostActivity extends AppCompatActivity {
                                 dbRef.child("upVoteUsers").push().setValue(selectedPost.getOwnerUserId());
                             }
                             else{
-                                //Toast.makeText(PostActivity.this, "Error up voting", Toast.LENGTH_SHORT).show();
+                               Toast.makeText(PostActivity.this, "Error up voting", Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -105,7 +112,7 @@ public class PostActivity extends AppCompatActivity {
                     });
                 }
                 else if(view.getId() == R.id.downvote){
-                    //Toast.makeText(PostActivity.this, "Downvote clicked" + position, Toast.LENGTH_SHORT).show();
+
                     final DatabaseReference dbRef = databaseReference.child("posts").child(selectedPost.getPincode()).child(selectedPost.getPostId());
                     dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -122,7 +129,7 @@ public class PostActivity extends AppCompatActivity {
                                 dbRef.child("downVoteUsers").push().setValue(selectedPost.getOwnerUserId());
                             }
                             else{
-                                //Toast.makeText(PostActivity.this, "Error down voting", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PostActivity.this, "Error down voting", Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -137,16 +144,17 @@ public class PostActivity extends AppCompatActivity {
 
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+
+
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        //recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(mAdapter);
 
-        //getCurrentLocation();
 
         Button signOut = (Button) findViewById(R.id.signOut);
         signOut.setOnClickListener(new View.OnClickListener() {
@@ -180,7 +188,6 @@ public class PostActivity extends AppCompatActivity {
             String pincodeUrl = getDirectionsUrl(currentLocation);
             DownloadTask downloadTask = new DownloadTask();
             downloadTask.execute(pincodeUrl);
-            // \n is for new line
         }else{
             // can't get location
             // GPS or Network is not enabled

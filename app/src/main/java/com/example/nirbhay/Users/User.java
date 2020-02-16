@@ -1,5 +1,8 @@
 package com.example.nirbhay.Users;
 
+/**
+ * This class encapsulates the data for any user.
+ */
 
 public class User {
     private String email, userId;

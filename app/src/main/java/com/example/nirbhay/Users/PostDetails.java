@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+/**
+ * This class encapsulates data of each Post.
+ */
 public class PostDetails {
     private String ownerUserId, postId, ownerName;
     private long upVoteCount, downVoteCount;
     private long noOfReports;
-    private String postBody;
+    private String postBody, feedback;
     private String pincode;
     private Date date;
     private HashMap<String, String> upVoteUsers;
@@ -16,7 +19,7 @@ public class PostDetails {
 
     }
 
-    public PostDetails(String pincode, String ownerName, String ownerUserId, String postId, long upVoteCount, long downVoteCount, ArrayList<String> upVoteUsers, ArrayList<String> downVoteUsers, long noOfReports, String postBody, Date date) {
+    public PostDetails(String pincode, String ownerName, String ownerUserId, String postId, long upVoteCount, long downVoteCount, ArrayList<String> upVoteUsers, ArrayList<String> downVoteUsers, long noOfReports, String postBody, Date date, String feedback) {
         this.pincode = pincode;
         this.ownerName = ownerName;
         this.ownerUserId = ownerUserId;
@@ -26,6 +29,15 @@ public class PostDetails {
         this.noOfReports = noOfReports;
         this.postBody = postBody;
         this.date = date;
+        this.feedback = feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public String getFeedback() {
+        return feedback;
     }
 
     public String getOwnerName() {
