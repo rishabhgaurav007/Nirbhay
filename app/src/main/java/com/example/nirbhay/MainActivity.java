@@ -42,9 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         auth = getInstance();
 
-
-
-
+        //to manage session login
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("Pref", 0);
         if(preferences!=null){
             if(preferences.getBoolean("signedIn", false)){
@@ -66,31 +64,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
-
-
-
     }
+
+    //validates the form
     private boolean validate(){
         String password = passwordField.getText().toString();
         String email = emailField.getText().toString();
 
         if(email.isEmpty()){
-            // Toast.makeText(MainActivity.this, "Email "  +email, Toast.LENGTH_SHORT).show();
-
             emailField.requestFocus();
             emailField.setError("Required!!");
             return false;
         }
         if(password.isEmpty()){
-            //Toast.makeText(MainActivity.this, "Pass "  +password, Toast.LENGTH_SHORT).show();
-
             passwordField.requestFocus();
             passwordField.setError("Required!!");
             return false;
         }
         return true;
     }
+
     public void signInClick(View view) {
 
         String password = passwordField.getText().toString();

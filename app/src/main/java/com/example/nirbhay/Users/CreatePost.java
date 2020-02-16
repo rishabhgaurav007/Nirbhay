@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nirbhay.R;
+import com.example.nirbhay.Users.MapDir.MapsActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
@@ -42,6 +44,7 @@ public class CreatePost extends AppCompatActivity {
     private Button chooseLocation, postButton;
     private EditText postBody;
     private LatLng loc;
+    private String pincode;
     private static final int REQUEST_CODE_LOC = 1;
     private DatabaseReference databaseReference;
     @Override
@@ -152,34 +155,10 @@ public class CreatePost extends AppCompatActivity {
                 else{
                     JSONArray jsonArray = jsonObject.getJSONArray("results");
                     JSONObject resultObject =jsonArray.getJSONObject(0);
-                    final String pincode = resultObject.getString("pincode");
-                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    final String ownerUserId = firebaseUser.getUid();
-                    final String postId = databaseReference.push().getKey();
-                    final Date date = new Date(System.currentTimeMillis());
-                    Toast.makeText(CreatePost.this, pincode, Toast.LENGTH_SHORT).show();
-                    databaseReference.child("users").child(ownerUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-
-                            PostDetails postDetails = new PostDetails();
-                            postDetails.setDate(date);
-                            postDetails.setOwnerUserId(ownerUserId);
-                            postDetails.setPostId(postId);
-                            postDetails.setPincode(pincode);
-                            postDetails.setPostBody(postBody.getText().toString());
-                            postDetails.setOwnerName(user.getName());
-                            databaseReference.child("posts").child(pincode).child(postId).setValue(postDetails);
-                            databaseReference.child("users").child(ownerUserId).child("postByUser").push().setValue(postId);
-                            finish();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Toast.makeText(CreatePost.this, "Error updating database", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    pincode = resultObject.getString("pincode");
+                    GetFeedback getFeedback = new GetFeedback();
+                    String url = "http://172.31.128.87:12345/nltkbro";
+                    getFeedback.execute(url, postBody.getText().toString());
                 }
 
             }catch (Exception e){
@@ -189,6 +168,113 @@ public class CreatePost extends AppCompatActivity {
         }
 
     }
+
+    private class GetFeedback extends AsyncTask<String, Void, String> {
+        private ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(CreatePost.this);
+            progressDialog.setMessage("Finding Routes...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... url) {
+            String data = "";
+            try {
+
+                URL object = new URL(url[0]);
+
+                HttpURLConnection con = (HttpURLConnection) object.openConnection();
+                con.setDoOutput(true);
+                con.setDoInput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("post", url[1]);
+                Log.i("info", url[1]);
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(jsonObject.toString());
+                wr.flush();
+
+//display what returns the POST request
+
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = con.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader(con.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    //System.out.println("" + sb.toString());
+                    data = sb.toString();
+                    //Toast.makeText(MainActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+
+                } else {
+                    //Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return  data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            progressDialog.hide();
+            Toast.makeText(CreatePost.this, result, Toast.LENGTH_SHORT).show();
+            if(result.contains("Response")){
+
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(result);
+                        final String prediction = jsonObject.getString("Response");
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        final String ownerUserId = firebaseUser.getUid();
+                        final String postId = databaseReference.push().getKey();
+                        final Date date = new Date(System.currentTimeMillis());
+                        Toast.makeText(CreatePost.this, pincode, Toast.LENGTH_SHORT).show();
+                        databaseReference.child("users").child(ownerUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                User user = dataSnapshot.getValue(User.class);
+
+                                PostDetails postDetails = new PostDetails();
+                                postDetails.setDate(date);
+                                postDetails.setOwnerUserId(ownerUserId);
+                                postDetails.setPostId(postId);
+                                postDetails.setPincode(pincode);
+                                postDetails.setPostBody(postBody.getText().toString());
+                                postDetails.setOwnerName(user.getName());
+                                postDetails.setFeedback(prediction);
+                                databaseReference.child("posts").child(pincode).child(postId).setValue(postDetails);
+                                databaseReference.child("users").child(ownerUserId).child("postByUser").push().setValue(postId);
+                                finish();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Toast.makeText(CreatePost.this, "Error updating database", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+
+
+                } else {
+                    Toast.makeText(CreatePost.this, "Error processing request", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        }
 
     private String getDirectionsUrl(LatLng origin) {
         String url = "https://apis.mapmyindia.com/advancedmaps/v1/zdhlcatxe8tt5mr6c9w3wrhrdfbbr8h3/rev_geocode?lat=" +origin.latitude+"&lng="+origin.longitude;
