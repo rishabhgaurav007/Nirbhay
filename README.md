@@ -18,6 +18,6 @@
 - [Rishabh Gaurav](https://github.com/rishabhgaurav007)
 - [Krishna Kant Singh](https://github.com/kks0101)
 - [Nitish Srivastava](https://github.com/nitish2904)
-- [Shivanshu Tripathi](https://github.com/shivanshu-gt)
+- [Shivanshu Tripathi](https://github.com/shivanshu-0)
 
 ## For HACK36
